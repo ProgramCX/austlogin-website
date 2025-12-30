@@ -6,7 +6,7 @@
           <svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          v0.1.0-alpha · 最新版本
+          {{ latestVersion }} · 最新版本
         </div>
         
         <h1 class="hero-title">
@@ -75,6 +75,28 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+
+// 版本信息
+const latestVersion = ref('加载中...')
+
+// 从 API 获取最新版本信息
+const fetchLatestVersion = async () => {
+  try {
+    const response = await fetch('/api/version/latest')
+    const result = await response.json()
+    if (result.code === 200 && result.data) {
+      latestVersion.value = 'v' + result.data.latestVersion
+    }
+  } catch (error) {
+    console.error('获取版本信息失败:', error)
+    latestVersion.value = '未知版本'
+  }
+}
+
+onMounted(() => {
+  fetchLatestVersion()
+})
 </script>
 
 <style scoped>

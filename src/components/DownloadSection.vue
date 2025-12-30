@@ -17,7 +17,7 @@
               推荐
             </div>
             <h3 class="download-card-title">最新版本</h3>
-            <p class="download-card-version">v0.1.0-alpha</p>
+            <p class="download-card-version">{{ latestVersion }}</p>
           </div>
           
           <div class="download-card-content">
@@ -150,10 +150,33 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
-// 最新版本下载链接 - 可自定义修改
-const latestDownloadUrl = ref('https://github.com/ProgramCX/AUSTLogin/releases/latest/download/austlogin-0.1.0-alpha.apk')
+// 版本信息
+const latestVersion = ref('加载中...')
+const latestDownloadUrl = ref('/api/version/download')
+const isLoading = ref(true)
+
+// 从 API 获取最新版本信息
+const fetchLatestVersion = async () => {
+  try {
+    const response = await fetch('/api/version/latest')
+    const result = await response.json()
+    if (result.code === 200 && result.data) {
+      latestVersion.value = 'v' + result.data.latestVersion
+      latestDownloadUrl.value = result.data.downloadUrl
+    }
+  } catch (error) {
+    console.error('获取版本信息失败:', error)
+    latestVersion.value = '获取失败'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchLatestVersion()
+})
 </script>
 
 <style scoped>
